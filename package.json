@@ -1,0 +1,24 @@
+{
+  "name": "threejs-solar-system",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "build": "webpack --mode development",
+    "start": "webpack serve --mode development"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.24.9",
+    "@babel/preset-env": "^7.25.0",
+    "babel-loader": "^9.1.3",
+    "webpack": "^5.93.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^3.11.3"
+  },
+  "dependencies": {
+    "three": "^0.128.0"
+  },
+  "keywords": [],
+  "description": ""
+}

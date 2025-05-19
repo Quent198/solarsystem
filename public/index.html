@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System with Three.js</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        canvas { display: block; }
+        #menu {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+            max-height: 90vh; /* Ensure the menu does not overflow the viewport */
+            overflow-y: auto; /* Add a scrollbar if needed */
+        }
+        #menu ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #menu li {
+            margin: 5px 0;
+            cursor: pointer;
+        }
+        #menu li:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <ul>
+            <li data-target="Sun">Sun</li>
+            <li data-target="Mercury">Mercury</li>
+            <li data-target="Venus">Venus</li>
+            <li data-target="Earth">Earth</li>
+            <li data-target="Moon">Moon</li>
+            <li data-target="Mars">Mars</li>
+            <li data-target="Phobos">Phobos</li>
+            <li data-target="Deimos">Deimos</li>
+            <li data-target="Jupiter">Jupiter</li>
+            <li data-target="Ganymede">Ganymede</li>
+            <li data-target="Callisto">Callisto</li>
+            <li data-target="Io">Io</li>
+            <li data-target="Europa">Europa</li>
+            <li data-target="Saturn">Saturn</li>
+            <li data-target="Titan">Titan</li>
+            <li data-target="Uranus">Uranus</li>
+            <li data-target="Titania">Titania</li>
+            <li data-target="Neptune">Neptune</li>
+            <li data-target="Triton">Triton</li>
+            <li data-target="Pluto">Pluto</li>
+            <li data-target="Charon">Charon</li>
+            <li data-target="Ceres">Ceres</li>
+            <li data-target="Haumea">Haumea</li>
+            <li data-target="Makemake">Makemake</li>
+            <li data-target="Eris">Eris</li>
+        </ul>
+    </div>
+    <script src="bundle.js"></script>
+</body>
+</html>
+
+
+
+
