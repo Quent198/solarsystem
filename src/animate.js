@@ -1,32 +1,53 @@
 function animate(planets, dwarfPlanets, scene, camera, renderer, controls) {
+    let lastTime = performance.now();
+    const timeScale = 0.1; // Ajustez cette valeur pour contrôler la vitesse globale
+
     function animateFrame() {
         requestAnimationFrame(animateFrame);
 
-        const currentTime = Date.now() * 0.0001;
+        const currentTime = performance.now();
+        const deltaTime = (currentTime - lastTime) * timeScale;
+        lastTime = currentTime;
 
         planets.concat(dwarfPlanets).forEach(planet => {
-            const distance = (planet.userData.distanceAph + planet.userData.distancePer) / 2;
-            const eccentricity = (planet.userData.distanceAph - planet.userData.distancePer) / (planet.userData.distanceAph + planet.userData.distancePer);
-            const a = distance; // semi-major axis
-            const b = a * Math.sqrt(1 - eccentricity ** 2); // semi-minor axis
+            // Calcul des paramètres orbitaux
+            const a = (planet.userData.distanceAph + planet.userData.distancePer) / 2; // demi-grand axe
+            const c = (planet.userData.distanceAph - planet.userData.distancePer) / 2; // distance du centre au foyer
+            const b = Math.sqrt(a * a - c * c); // demi-petit axe
+            const eccentricity = c / a;
 
-            planet.userData.angle += planet.userData.revolutionSpeed;
-            planet.position.x = a * Math.cos(planet.userData.angle + currentTime);
-            planet.position.z = b * Math.sin(planet.userData.angle + currentTime);
+            // Mise à jour de l'angle de révolution
+            planet.userData.angle += planet.userData.revolutionSpeed * deltaTime;
 
-            // Rotate the planet on its axis
-            planet.rotation.y += planet.userData.rotationSpeed;
+            // Calcul de la position sur l'orbite elliptique
+            const x = a * Math.cos(planet.userData.angle);
+            const z = b * Math.sin(planet.userData.angle);
+            planet.position.set(x, 0, z);
 
-            planet.userData.moons.forEach((moon, index) => {
-                moon.userData.angle += moon.userData.revolutionSpeed;
-                moon.position.x = planet.position.x + Math.cos(moon.userData.angle + currentTime) * moon.userData.distance;
-                moon.position.z = planet.position.z + Math.sin(moon.userData.angle + currentTime) * moon.userData.distance;
+            // Rotation sur l'axe
+            planet.rotation.y += planet.userData.rotationSpeed * deltaTime;
 
-                // Rotate the moon on its axis
-                moon.rotation.y += moon.userData.rotationSpeed;
+            // Animation des lunes
+            planet.userData.moons.forEach(moon => {
+                moon.userData.angle += moon.userData.revolutionSpeed * deltaTime;
+                
+                // Position relative à la planète
+                const moonX = Math.cos(moon.userData.angle) * moon.userData.distance;
+                const moonZ = Math.sin(moon.userData.angle) * moon.userData.distance;
+                
+                // Position absolue dans l'espace
+                moon.position.set(
+                    planet.position.x + moonX,
+                    0,
+                    planet.position.z + moonZ
+                );
+
+                // Rotation de la lune sur son axe
+                moon.rotation.y += moon.userData.rotationSpeed * deltaTime;
             });
         });
 
+        // Mise à jour des contrôles et rendu
         controls.update();
         renderer.render(scene, camera);
     }

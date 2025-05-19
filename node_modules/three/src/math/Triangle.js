@@ -1,5 +1,4 @@
 import { Vector3 } from './Vector3.js';
-import { Plane } from './Plane.js';
 
 const _v0 = /*@__PURE__*/ new Vector3();
 const _v1 = /*@__PURE__*/ new Vector3();
@@ -24,13 +23,6 @@ class Triangle {
 	}
 
 	static getNormal( a, b, c, target ) {
-
-		if ( target === undefined ) {
-
-			console.warn( 'THREE.Triangle: .getNormal() target is now required' );
-			target = new Vector3();
-
-		}
 
 		target.subVectors( c, b );
 		_v0.subVectors( a, b );
@@ -63,19 +55,11 @@ class Triangle {
 
 		const denom = ( dot00 * dot11 - dot01 * dot01 );
 
-		if ( target === undefined ) {
-
-			console.warn( 'THREE.Triangle: .getBarycoord() target is now required' );
-			target = new Vector3();
-
-		}
-
 		// collinear or singular triangle
 		if ( denom === 0 ) {
 
-			// arbitrary location outside of triangle?
-			// not sure if this is the best idea, maybe should be returning undefined
-			return target.set( - 2, - 1, - 1 );
+			target.set( 0, 0, 0 );
+			return null;
 
 		}
 
@@ -90,20 +74,33 @@ class Triangle {
 
 	static containsPoint( point, a, b, c ) {
 
-		this.getBarycoord( point, a, b, c, _v3 );
+		// if the triangle is degenerate then we can't contain a point
+		if ( this.getBarycoord( point, a, b, c, _v3 ) === null ) {
+
+			return false;
+
+		}
 
 		return ( _v3.x >= 0 ) && ( _v3.y >= 0 ) && ( ( _v3.x + _v3.y ) <= 1 );
 
 	}
 
-	static getUV( point, p1, p2, p3, uv1, uv2, uv3, target ) {
+	static getInterpolation( point, p1, p2, p3, v1, v2, v3, target ) {
 
-		this.getBarycoord( point, p1, p2, p3, _v3 );
+		if ( this.getBarycoord( point, p1, p2, p3, _v3 ) === null ) {
 
-		target.set( 0, 0 );
-		target.addScaledVector( uv1, _v3.x );
-		target.addScaledVector( uv2, _v3.y );
-		target.addScaledVector( uv3, _v3.z );
+			target.x = 0;
+			target.y = 0;
+			if ( 'z' in target ) target.z = 0;
+			if ( 'w' in target ) target.w = 0;
+			return null;
+
+		}
+
+		target.setScalar( 0 );
+		target.addScaledVector( v1, _v3.x );
+		target.addScaledVector( v2, _v3.y );
+		target.addScaledVector( v3, _v3.z );
 
 		return target;
 
@@ -139,6 +136,16 @@ class Triangle {
 
 	}
 
+	setFromAttributeAndIndices( attribute, i0, i1, i2 ) {
+
+		this.a.fromBufferAttribute( attribute, i0 );
+		this.b.fromBufferAttribute( attribute, i1 );
+		this.c.fromBufferAttribute( attribute, i2 );
+
+		return this;
+
+	}
+
 	clone() {
 
 		return new this.constructor().copy( this );
@@ -166,13 +173,6 @@ class Triangle {
 
 	getMidpoint( target ) {
 
-		if ( target === undefined ) {
-
-			console.warn( 'THREE.Triangle: .getMidpoint() target is now required' );
-			target = new Vector3();
-
-		}
-
 		return target.addVectors( this.a, this.b ).add( this.c ).multiplyScalar( 1 / 3 );
 
 	}
@@ -185,13 +185,6 @@ class Triangle {
 
 	getPlane( target ) {
 
-		if ( target === undefined ) {
-
-			console.warn( 'THREE.Triangle: .getPlane() target is now required' );
-			target = new Plane();
-
-		}
-
 		return target.setFromCoplanarPoints( this.a, this.b, this.c );
 
 	}
@@ -202,9 +195,9 @@ class Triangle {
 
 	}
 
-	getUV( point, uv1, uv2, uv3, target ) {
+	getInterpolation( point, v1, v2, v3, target ) {
 
-		return Triangle.getUV( point, this.a, this.b, this.c, uv1, uv2, uv3, target );
+		return Triangle.getInterpolation( point, this.a, this.b, this.c, v1, v2, v3, target );
 
 	}
 
@@ -227,13 +220,6 @@ class Triangle {
 	}
 
 	closestPointToPoint( p, target ) {
-
-		if ( target === undefined ) {
-
-			console.warn( 'THREE.Triangle: .closestPointToPoint() target is now required' );
-			target = new Vector3();
-
-		}
 
 		const a = this.a, b = this.b, c = this.c;
 		let v, w;

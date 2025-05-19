@@ -288,6 +288,32 @@ class GPUComputationRenderer {
 
 		};
 
+		this.dispose = function () {
+
+			mesh.geometry.dispose();
+			mesh.material.dispose();
+
+			const variables = this.variables;
+
+			for ( let i = 0; i < variables.length; i ++ ) {
+
+				const variable = variables[ i ];
+
+				if ( variable.initialValueTexture ) variable.initialValueTexture.dispose();
+
+				const renderTargets = variable.renderTargets;
+
+				for ( let j = 0; j < renderTargets.length; j ++ ) {
+
+					const renderTarget = renderTargets[ j ];
+					renderTarget.dispose();
+
+				}
+
+			}
+
+		};
+
 		function addResolutionDefine( materialShader ) {
 
 			materialShader.defines.resolution = 'vec2( ' + sizeX.toFixed( 1 ) + ', ' + sizeY.toFixed( 1 ) + ' )';
@@ -304,6 +330,7 @@ class GPUComputationRenderer {
 			uniforms = uniforms || {};
 
 			const material = new ShaderMaterial( {
+				name: 'GPUComputationShader',
 				uniforms: uniforms,
 				vertexShader: getPassThroughVertexShader(),
 				fragmentShader: computeFragmentShader
@@ -345,7 +372,9 @@ class GPUComputationRenderer {
 		this.createTexture = function () {
 
 			const data = new Float32Array( sizeX * sizeY * 4 );
-			return new DataTexture( data, sizeX, sizeY, RGBAFormat, FloatType );
+			const texture = new DataTexture( data, sizeX, sizeY, RGBAFormat, FloatType );
+			texture.needsUpdate = true;
+			return texture;
 
 		};
 
@@ -367,10 +396,18 @@ class GPUComputationRenderer {
 
 			const currentRenderTarget = renderer.getRenderTarget();
 
+			const currentXrEnabled = renderer.xr.enabled;
+			const currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
+
+			renderer.xr.enabled = false; // Avoid camera modification
+			renderer.shadowMap.autoUpdate = false; // Avoid re-computing shadows
 			mesh.material = material;
 			renderer.setRenderTarget( output );
 			renderer.render( scene, camera );
 			mesh.material = passThruShader;
+
+			renderer.xr.enabled = currentXrEnabled;
+			renderer.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
 			renderer.setRenderTarget( currentRenderTarget );
 

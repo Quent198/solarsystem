@@ -1,4 +1,5 @@
 const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/main.js',
@@ -9,24 +10,43 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(png|jpe?g|gif)$/i,
-                use: [
-                    {
-                        loader: 'file-loader',
-                        options: {
-                            name: '[path][name].[ext]',
-                            context: 'src', // prevent display of src/ in filename
-                        },
-                    },
-                ],
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: {
+                    loader: 'babel-loader'
+                }
             },
+            {
+                test: /\.(png|jpe?g|gif)$/i,
+                type: 'asset/resource',
+                generator: {
+                    filename: 'textures/[name][ext]'
+                }
+            }
         ],
     },
     devServer: {
-        static: path.join(__dirname, 'public'),
+        static: {
+            directory: path.join(__dirname, 'public'),
+            publicPath: '/',
+        },
         compress: true,
-        port: 9000,
+        port: 8080,
+        open: true,
+        hot: true,
+        historyApiFallback: true,
     },
+    mode: 'development',
+    plugins: [
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'textures'), // Source folder (project root/textures)
+                    to: path.resolve(__dirname, 'public/textures') // Destination folder (public/textures)
+                },
+            ],
+        }),
+    ],
 };
 
 
